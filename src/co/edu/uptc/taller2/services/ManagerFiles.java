@@ -1,19 +1,24 @@
 package co.edu.uptc.taller2.services;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import co.edu.uptc.taller2.models.Person;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
-import co.edu.uptc.taller2.models.Person;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ManagerFiles {
     private String path;
@@ -40,14 +45,41 @@ public class ManagerFiles {
     public JSONArray readFilejson() throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         Object obj = jsonParser.parse(new FileReader(path));
-        JSONArray jsonArray = (JSONArray) obj;
-        return jsonArray;
+        return (JSONArray) obj;
     }
 
-    public List<Person> completPersons() throws IOException, ParseException {
+    public NodeList readFileXml() throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        File archivoXML = new File("people.xml");
+        Document doc = dBuilder.parse(archivoXML);
+        doc.getDocumentElement().normalize();
+        NodeList personList = doc.getElementsByTagName("persona");
+        return personList;
+    }
+
+    public NodeList completePersonsXml() throws ParserConfigurationException, IOException, SAXException {
+        List<Person> persons = new ArrayList<>();
+        NodeList personList = readFileXml();
+//        for (int i = 0; i < personList.getLength(); i++) {
+//            Element persona = (Element) personList.item(i);
+//            String name = persona.getElementsByTagName("nombre").item(0).getTextContent();
+//            String lastName = persona.getElementsByTagName("apellidos").item(0).getTextContent();
+//            String salary = persona.getElementsByTagName("salario").item(0).getTextContent();
+//            String age = persona.getElementsByTagName("edad").item(0).getTextContent();
+//            Person person1 = new Person();
+//            person1.setName((String) name);
+//            person1.setLastName((String) lastName);
+//            person1.setAge(Integer.parseInt(salary));
+//            person1.setSalary(Integer.parseInt(age));
+//            persons.add(person1);
+//        }
+        return personList;
+    }
+
+    public List<Person> completePersonsJson() throws IOException, ParseException {
         List<Person> persons = new ArrayList<>();
         JSONArray jsonArray = readFilejson();
-
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject person = (JSONObject) jsonArray.get(i);
             Person person1 = new Person();
@@ -61,8 +93,23 @@ public class ManagerFiles {
         return persons;
     }
 
+    public void writeXml(Node person,String fileName) throws ParserConfigurationException, IOException, TransformerException {
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.newDocument();
+        Element rootElement = doc.createElement("person");
+        doc.appendChild(rootElement);
+        Node importedNode = doc.importNode(person, true);
+        rootElement.appendChild(importedNode);
+        FileWriter writer = new FileWriter(fileName);
+        javax.xml.transform.TransformerFactory.newInstance().newTransformer().transform(
+                new javax.xml.transform.dom.DOMSource(doc),
+                new javax.xml.transform.stream.StreamResult(writer));
+        writer.close();
+    }
+
     public long promedioSalarios() throws IOException, ParseException {
-        List<Person> persons = completPersons();
+        List<Person> persons = completePersonsJson();
         long promedioSalarios = 0;
         for (Person person : persons) {
             promedioSalarios += person.getSalary();
@@ -73,7 +120,7 @@ public class ManagerFiles {
 
     public List<Person> puntoA() throws IOException, ParseException {
         long promedioSalarios = promedioSalarios();
-        List<Person> persons = completPersons();
+        List<Person> persons = completePersonsJson();
         List<Person> puntoA = new ArrayList<>();
         for (Person person : persons) {
             if (person.getSalary() > promedioSalarios) {
@@ -84,7 +131,7 @@ public class ManagerFiles {
     }
 
     public List<Person> puntoB() throws IOException, ParseException {
-        List<Person> persons = completPersons();
+        List<Person> persons = completePersonsJson();
         List<Person> puntoB = new ArrayList<>();
         long promedioSalarios = promedioSalarios();
         for (Person person : persons) {
