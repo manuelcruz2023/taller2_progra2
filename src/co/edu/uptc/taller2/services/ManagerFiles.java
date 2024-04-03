@@ -14,7 +14,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.*;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class ManagerFiles {
     public NodeList readFileXml() throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        File archivoXML = new File("people.xml");
+        File archivoXML = new File(path);
         Document doc = dBuilder.parse(archivoXML);
         doc.getDocumentElement().normalize();
         NodeList personList = doc.getElementsByTagName("persona");
@@ -59,21 +58,7 @@ public class ManagerFiles {
     }
 
     public NodeList completePersonsXml() throws ParserConfigurationException, IOException, SAXException {
-        List<Person> persons = new ArrayList<>();
         NodeList personList = readFileXml();
-//        for (int i = 0; i < personList.getLength(); i++) {
-//            Element persona = (Element) personList.item(i);
-//            String name = persona.getElementsByTagName("nombre").item(0).getTextContent();
-//            String lastName = persona.getElementsByTagName("apellidos").item(0).getTextContent();
-//            String salary = persona.getElementsByTagName("salario").item(0).getTextContent();
-//            String age = persona.getElementsByTagName("edad").item(0).getTextContent();
-//            Person person1 = new Person();
-//            person1.setName((String) name);
-//            person1.setLastName((String) lastName);
-//            person1.setAge(Integer.parseInt(salary));
-//            person1.setSalary(Integer.parseInt(age));
-//            persons.add(person1);
-//        }
         return personList;
     }
 
@@ -89,11 +74,11 @@ public class ManagerFiles {
             person1.setSalary(Integer.parseInt(person.get("salario").toString()));
             persons.add(person1);
         }
-        System.out.println("Se cargaron " + persons.size() + " personas");
         return persons;
     }
 
-    public void writeXml(Node person,String fileName) throws ParserConfigurationException, IOException, TransformerException {
+    public void writeXml(Node person, String fileName)
+            throws ParserConfigurationException, IOException, TransformerException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.newDocument();
@@ -101,7 +86,7 @@ public class ManagerFiles {
         doc.appendChild(rootElement);
         Node importedNode = doc.importNode(person, true);
         rootElement.appendChild(importedNode);
-        FileWriter writer = new FileWriter(fileName);
+        FileWriter writer = new FileWriter(fileName, true);
         javax.xml.transform.TransformerFactory.newInstance().newTransformer().transform(
                 new javax.xml.transform.dom.DOMSource(doc),
                 new javax.xml.transform.stream.StreamResult(writer));
@@ -147,15 +132,17 @@ public class ManagerFiles {
         char c = '"';
         for (Person person : personList) {
             if (personList.indexOf(person) != personList.size() - 1) {
-                jsonList.add("{" + c + "nombre" + c + ":" + c + person.getName() + c + "," + c + "apellido" + c + ":" + c
+                jsonList.add("{" + c + "nombre" + c + ":" + c + person.getName() + c + "," + c + "apellido" + c + ":"
+                        + c
                         + person.getLastName() + c + "," + c + "salario" + c + ":" + person.getSalary() + "," + c
                         + "edad" + c
-                        + ":" + person.getAge() +" }" + "," + "\n");
-            }else{
-                jsonList.add("{" + c + "nombre" + c + ":" + c + person.getName() + c + "," + c + "apellido" + c + ":" + c
+                        + ":" + person.getAge() + " }" + "," + "\n");
+            } else {
+                jsonList.add("{" + c + "nombre" + c + ":" + c + person.getName() + c + "," + c + "apellido" + c + ":"
+                        + c
                         + person.getLastName() + c + "," + c + "salario" + c + ":" + person.getSalary() + "," + c
                         + "edad" + c
-                        + ":" + person.getAge() +" }" + "\n");
+                        + ":" + person.getAge() + "}" + "\n");
             }
         }
         return jsonList;

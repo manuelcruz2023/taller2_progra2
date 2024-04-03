@@ -1,6 +1,5 @@
 package co.edu.uptc.taller2.controllers;
 
-import co.edu.uptc.taller2.models.Person;
 import co.edu.uptc.taller2.services.ManagerFiles;
 import co.edu.uptc.text.ManagerProperties;
 import org.w3c.dom.Element;
@@ -10,21 +9,20 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.util.List;
-
 public class ShowManagerFiles {
     public ManagerFiles managerFiles = new ManagerFiles();
 
     public void Show () {
         ManagerProperties managerProperties = new ManagerProperties();
         managerProperties.setFileName("data.properties");
-        managerFiles.setPath("people.json");
         try {
-            managerFiles.readTxt();
-            managerFiles.readFilejson();
+            managerFiles.setPath("people.xml");
             managerFiles.readFileXml();
             managerFiles.completePersonsXml();
             writeXml();
+            managerFiles.setPath("people.json");
+            managerFiles.readTxt();
+            managerFiles.readFilejson();
             managerFiles.completePersonsJson();
             managerFiles.puntoA();
             managerFiles.createFileJson("puntoA.json", managerFiles.puntoA());
@@ -40,7 +38,6 @@ public class ShowManagerFiles {
         for (int i =0;i<persons.getLength();i++){
             Element person = (Element) persons.item(i);
             int age = Integer.parseInt(person.getElementsByTagName("edad").item(0).getTextContent());
-
             if(age<18){
                 managerFiles.writeXml(person,"A.xml");
             }else{
