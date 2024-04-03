@@ -5,7 +5,6 @@ import co.edu.uptc.text.ManagerProperties;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
@@ -29,7 +28,6 @@ public class ShowManagerFiles {
             managerFiles.puntoB();
             managerFiles.createFileJson("puntoB.json", managerFiles.puntoB());
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
